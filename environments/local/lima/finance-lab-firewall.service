@@ -1,0 +1,18 @@
+[Unit]
+Description=Finance Lab guest firewall
+Documentation=man:nft(8)
+DefaultDependencies=no
+Wants=network-pre.target
+After=local-fs.target
+Before=network-pre.target k3s.service shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft --file /etc/finance-lab/firewall.nft
+ExecReload=/usr/sbin/nft --file /etc/finance-lab/firewall.nft
+# Deliberately no ExecStop: stopping the unit must not flush packet filters.
+
+[Install]
+WantedBy=sysinit.target

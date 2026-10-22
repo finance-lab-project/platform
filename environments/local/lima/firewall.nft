@@ -1,0 +1,65 @@
+# Platform #1 revision 8 / platform #2: single-node IPv4 Lima guest.
+# Prepared configuration only. Validate with nft --check; application is a separate step.
+# Own only this table. Never flush the whole ruleset or Lima/K3s-owned tables.
+define lima_gateway = 192.168.5.2
+define lima_node = 192.168.5.15
+define pod_cidr = 10.42.0.0/16
+
+add table inet finance_lab
+flush table inet finance_lab
+
+table inet finance_lab {
+    # Run after ordinary iptables filter hooks (priority 0). An accept here
+    # cannot override a drop in another base chain, including NetworkPolicy.
+    chain input {
+        type filter hook input priority 10; policy drop;
+
+        iifname "lo" counter accept comment "Guest loopback"
+        ct state established,related counter accept comment "Replies, including established Mac SSH"
+
+        # DHCP can be broadcast and need not match an established connection.
+        iifname "eth0" ip saddr $lima_gateway ip daddr { $lima_node, 255.255.255.255 } udp sport 67 udp dport 68 counter accept comment "Lima DHCP replies"
+        ct state invalid counter drop
+
+        iifname "eth0" ip saddr $lima_gateway ip daddr $lima_node tcp dport 22 ct state new counter accept comment "Mac-initiated Lima SSH"
+
+        # Future single-node Flannel bridge. Names may be absent before K3s.
+        # Workload-specific access still needs the planned NetworkPolicies.
+        iifname "cni0" ip saddr $pod_cidr tcp dport { 6443, 10250, 9100 } ct state new counter accept comment "Pod paths to API, kubelet and node exporter"
+
+        # Policy drops other unsolicited input, including eth0 management ports,
+        # VXLAN 8472 and unsolicited IPv6. No LAN or additional-node allowance.
+    }
+
+    chain output {
+        type filter hook output priority 10; policy accept;
+
+        ct state established,related counter accept comment "Preserve replies and existing connections"
+        oifname "eth0" ip daddr { $lima_gateway, 255.255.255.255 } udp sport 68 udp dport 67 counter accept comment "Lima DHCP discovery and renewal"
+        ct state invalid counter drop
+
+        # DNS exception MUST precede the gateway denial. Destination port only.
+        ip daddr $lima_gateway udp dport 53 counter accept comment "Node DNS to Lima"
+        ip daddr $lima_gateway tcp dport 53 counter accept comment "Node DNS over TCP to Lima"
+        ip daddr $lima_gateway counter drop comment "Deny other NEW or untracked node-to-Mac gateway traffic"
+
+        # Node bootstrap/download egress otherwise remains available.
+    }
+
+    chain forward {
+        type filter hook forward priority 10; policy accept;
+
+        ct state established,related counter accept comment "Preserve routed reply traffic"
+        ct state invalid counter drop
+        iifname "eth0" counter drop comment "No unsolicited routed ingress from Lima network"
+
+        # DNS exception MUST precede the gateway denial; it does not bypass
+        # K3s policy chains. This chain is not a pod egress allowlist.
+        ip daddr $lima_gateway udp dport 53 counter accept comment "Permitted pod DNS to Lima"
+        ip daddr $lima_gateway tcp dport 53 counter accept comment "Permitted pod DNS over TCP to Lima"
+        ip daddr $lima_gateway counter drop comment "Deny other NEW or untracked pod-to-Mac gateway traffic"
+
+        # Leave CNI/Service routing and workload policy decisions to K3s.
+        # No NAT, packet marks or K3s-managed chains are changed here.
+    }
+}

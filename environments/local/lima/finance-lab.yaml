@@ -1,0 +1,48 @@
+# Platform #1 revision 7 / platform #2, local Lima configuration only.
+# Required host tool: Lima 2.2.1 (darwin/arm64); reject older versions.
+minimumLimaVersion: "2.2.1"
+vmType: vz
+os: Linux
+arch: aarch64
+cpus: 4
+memory: 8GiB
+disk: 60GiB
+
+# Standalone dated image: no moving Ubuntu alias or inherited template.
+base: []
+images:
+  - location: https://cloud-images.ubuntu.com/releases/noble/release-20261017/ubuntu-24.04-server-cloudimg-arm64.img
+    arch: aarch64
+    digest: sha256:50e24e1fb79e89116e939d90aa7738f7af48c442fa1bc2510131e0b39c50348e
+
+# State stays inside the guest. K3s will supply its own runtime in a later step.
+mounts: []
+containerd:
+  system: false
+  user: false
+upgradePackages: false
+provision: []
+
+# Default user-mode network only; no LAN, bridged, or VZ NAT attachment.
+networks: []
+ssh:
+  localPort: 60022
+  overVsock: false
+  loadDotSSHPubKeys: false
+  forwardAgent: false
+hostResolver:
+  enabled: true
+  ipv6: false
+  hosts:
+    app.finance-lab.test: 10.43.0.80
+    api.finance-lab.test: 10.43.0.80
+    auth.finance-lab.test: 10.43.0.80
+
+# Application/API access will use explicit foreground SSH tunnels later.
+# Lima's SSH control forward (60022 -> guest 22) remains separate.
+portForwards:
+  - guestIP: "0.0.0.0"
+    guestIPMustBeZero: false
+    guestPortRange: [1, 65535]
+    proto: any
+    ignore: true

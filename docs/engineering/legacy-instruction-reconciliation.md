@@ -1,0 +1,22 @@
+# Legacy instruction reconciliation
+
+The older agent rules were inspected in:
+- [anton415/finance-lab AGENTS.md](https://github.com/anton415/finance-lab/blob/main/AGENTS.md) — current frontend source, original core policy.
+- [anton415/finance-lab-archive AGENTS.md](https://github.com/anton415/finance-lab-archive/blob/main/AGENTS.md) — older Russian instruction set.
+- [archive AI process](https://github.com/anton415/finance-lab-archive/blob/main/docs/ai-process.md) and [frontend CI/PR observations](https://github.com/anton415/finance-lab/blob/main/docs/ai-process.md) — evidence limits, not deployment policy.
+
+| Legacy rule | Treatment in 2026 multi-repo policy |
+| --- | --- |
+| Only smallest issue-scoped changes; no unapproved feature/requirement/automation | Preserve, explicitly apply to each service and both execution modes. |
+| Do not expand Release 1 because a reviewer hypothesizes an out-of-scope failure | Preserve, alongside current scoped review rules. |
+| For documentation-only changes, inspect changed text, links and examples | Preserve; don't falsely claim a code/test run. |
+| Metrics must use verified technical sources; unknown must not be zero | Preserve; use `unknown` for missing evidence. |
+| GitHub account activity is not necessarily a human action; do not store chat in metrics | Preserve; apply also to human merge/signoff and learning assessments. |
+| Follow `~/.codex/AGENTS.md` | **Not transplanted literally**; local machine file is not available to cloud agents. Its project-relevant substantive rules are now in repository files. |
+| AI commit identity/trailers, scoped PR verification and public-data protection | Preserve the more detailed current frontend policy, and share in the service template. |
+
+The substantive rules are written into the proposed [Platform AGENTS.md](../../AGENTS.md) and [Budget service AGENTS.md](https://github.com/finance-lab-project/budget-service/blob/docs/learning-delivery-agent-policy-20261023/AGENTS.md). The [BFF template](web-bff-AGENTS-template.md) is published for later installation once that repository has a base commit. None of these files becomes operative on `main` until its respective PR is reviewed and merged. Root `AGENTS.md` governs only its own repository.
+
+## Current adoption boundary
+
+The historical repositories remain reference material, not the deployment target. `finance-lab-project/platform` is the cross-service documentation home; executable agents in another repository must read that repository's own root instructions. A published link in this document does not install an instruction file or permit execution.

@@ -27,13 +27,15 @@ See [execution-modes.md](execution-modes.md) and [A1 historical planning index](
 | [web-bff #1 — browser/session contract](https://github.com/finance-lab-project/web-bff/issues/1) | `mode:learning` (design only) | Next learning task **after #12**, if selected. Human owns security boundary decisions; no simultaneous learning WIP. |
 | [web-bff #2 — login/sessions](https://github.com/finance-lab-project/web-bff/issues/2) | `mode:delivery` | Implement only after the contract checkpoint; carefully gate credentials. |
 | [web-bff #3 — authenticated Budget forwarding](https://github.com/finance-lab-project/web-bff/issues/3) | `mode:delivery` | Preserve exact operation identity and no automatic retry. |
-| [frontend #155 — signed-in budget journey](https://github.com/anton415/finance-lab/issues/155) | `mode:delivery` | BFF dependency and real browser integration required. |
-| [frontend #156 — draft/conflict safety](https://github.com/anton415/finance-lab/issues/156) | `mode:delivery` | Preserve draft and pending operation; human acceptance of safe retry semantics. |
-| [frontend #157 — independent SPA release](https://github.com/anton415/finance-lab/issues/157) | `mode:delivery` | Must verify actual deployed browser path; no CI success assumptions. |
+| [historical personal-repo frontend #155 — signed-in budget journey](https://github.com/anton415/finance-lab/issues/155) | `mode:delivery` | BFF dependency and real browser integration required. |
+| [historical personal-repo frontend #156 — draft/conflict safety](https://github.com/anton415/finance-lab/issues/156) | `mode:delivery` | Preserve draft and pending operation; human acceptance of safe retry semantics. |
+| [historical personal-repo frontend #157 — independent SPA release](https://github.com/anton415/finance-lab/issues/157) | `mode:delivery` | Must verify actual deployed browser path; no CI success assumptions. |
+
+The three frontend rows are **historic cross-repository dependencies** until the UI is migrated into an organization repository. Their suggested modes are not applied GitHub labels, nor permission to modify the old repository.
 
 ## Supporting and deferred work
 
-- A **new platform-owned local stand learning drill** is planned after the foundation stabilizes and after the active Go learning task. It does not authorize fault injection or a second simultaneous learning WIP.
+- [Platform #11 — Mac mini/Lima diagnostic learning drill](https://github.com/finance-lab-project/platform/issues/11) is `mode:learning`, **Backlog/opt-in** after the foundation stabilizes and after the protected Go learning task. It does not authorize fault injection or a second simultaneous learning WIP.
 - [Historical frontend #96 — manual calibration](https://github.com/anton415/finance-lab/issues/96) stays human-led `mode:learning`; the original descriptive `learning` label can remain.
 - [Historical AgentOps #154 — synthetic Go Budget adversarial review pilot](https://github.com/anton415/finance-lab/issues/154) is **optional** learning/evaluation, not a Go Budget release prerequisite; proposed `mode:learning` does not authorize mutation or model dispatch.
 - [Historical AgentOps #158 — Halfcycle evaluation](https://github.com/anton415/finance-lab/issues/158) is a deferred human-led comparison; no license/purchase or switch from Codex is authorized.
@@ -43,12 +45,12 @@ See [execution-modes.md](execution-modes.md) and [A1 historical planning index](
 
 ## Organization rollout and implementation gate
 
-The destination is the **`finance-lab-project` organization**, not either legacy personal repository. The installed GitHub integration can create review branches in `platform` and `budget-service`. The BFF repository has no commits yet; no PR/AGENTS.md may exist there until it is initialized through a separately reviewed bootstrap. Issue labels may be set as **classification only**, with no `needs:*` or Project Status changes.
+The destination is the **`finance-lab-project` organization**, not either legacy personal repository. The installed GitHub integration can create review branches in `platform` and `budget-service`. The BFF repository has no commits yet; no PR/AGENTS.md may exist there until it is initialized through a separately approved initial commit and reviewed instruction PR. Issue labels are **classification only**, with no `needs:*` or Project Status changes.
 
-- GitHub issues in [budget-service](https://github.com/finance-lab-project/budget-service/issues) and [platform](https://github.com/finance-lab-project/platform/issues) receive mode labels; cross-service tracker Budget #18 and planning-only Platform #1 remain unlabeled until executable work is separately selected.
+- Mode labels were applied and verified at creation to 20 organization issues: Budget #12–17, Platform #2–11 and Web BFF #1–4 (including the two new opt-in issues). Budget #18 (integration tracker) and Platform #1 (planning baseline) intentionally remain unlabeled. No old personal-repository issue was relabeled.
 - Issue classification reflects **intended mode**. A mode label does not grant an Implementer permission to run tests, change infrastructure, consume paid resources, or create code.
 - Review/merge of root `AGENTS.md` PRs and exact human task briefs must precede any new mode-based agent dispatch. The current GitHub tooling has **not** been shown to enforce this automatically.
-- BFF issues may be classified, but the policy must also be installed via a reviewable PR after a human-reviewed repository initialization. See the BFF governance template and bootstrap tracker in the org.
+- The BFF repository is empty, so no root instruction PR exists there yet. [BFF bootstrap tracker #4](https://github.com/finance-lab-project/web-bff/issues/4) and [BFF AGENTS template](web-bff-AGENTS-template.md) preserve the needed work; no direct-to-main first commit was made by this rollout.
 
 ## Practical learning acceptance
 

@@ -15,7 +15,7 @@ The older agent rules were inspected in:
 | Follow `~/.codex/AGENTS.md` | **Not transplanted literally**; local machine file is not available to cloud agents. Its project-relevant substantive rules are now in repository files. |
 | AI commit identity/trailers, scoped PR verification and public-data protection | Preserve the more detailed current frontend policy, and share in the service template. |
 
-The [platform AGENTS.md](../../AGENTS.md), the [Budget service AGENTS.md](https://github.com/finance-lab-project/budget-service/blob/main/AGENTS.md) after its review/merge, and the [BFF template](web-bff-AGENTS-template.md) is intended for organization repositories that currently lack their own root policy. Do not treat publication here as installation in those repositories. Root `AGENTS.md` governs only the repository where it is committed, not external GitHub organizations.
+The substantive rules are written into the proposed [Platform AGENTS.md](../../AGENTS.md) and [Budget service AGENTS.md](https://github.com/finance-lab-project/budget-service/blob/docs/learning-delivery-agent-policy-20261023/AGENTS.md). The [BFF template](web-bff-AGENTS-template.md) is published for later installation once that repository has a base commit. None of these files becomes operative on `main` until its respective PR is reviewed and merged. Root `AGENTS.md` governs only its own repository.
 
 ## Current adoption boundary
 

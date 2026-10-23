@@ -1,13 +1,16 @@
 # Guest firewall — platform #2
 
-Status: **installed, active and enabled; requested runtime checks passed**
-(2026-10-22). The approved retry preserved existing SSH, removed its temporary
-tracking table and cancelled rollback after validation. Restart persistence and
-K3s/pod integration remain untested. The initial failed attempt is retained below.
+Status: **installed, active and enabled; normal restart, controlled reload
+and tested node ingress/gateway checks passed** (2026-10-22). The firewall loads
+before network setup, preserves SSH through reload and denies the tested inbound
+TCP/UDP paths. First-start K3s/pod integration and the subsequent K3s-enabled
+normal restart checks pass as summarized below. Coverage limits and earlier
+attempts remain stage-specific evidence.
 Implements the guest-firewall portion of
 [platform #1 revision 8](https://github.com/finance-lab-project/platform/issues/1)
-and [platform #2 revision 3](https://github.com/finance-lab-project/platform/issues/2).
-K3s and NetworkPolicies remain pending; this is guest-level enforcement only.
+and [platform #2](https://github.com/finance-lab-project/platform/issues/2).
+K3s is running; its policy engine was tested with a temporary policy. Final
+workload-specific NetworkPolicies remain pending.
 
 ## Files and ownership
 
@@ -25,8 +28,8 @@ change forwarding sysctls or replace Kubernetes NetworkPolicy.
 All three hooks use priority **10**, after the ordinary iptables filter priority
 **0**. A drop remains terminal; an accept in one base chain does not override a
 drop elsewhere. Thus the DNS exception cannot bypass a K3s policy rejection.
-Inspect the actual K3s chains and hook priorities after its separate installation;
-current validation cannot prove their future integration.
+First-start inspection confirmed K3s filter hooks at priority 0, and a temporary
+pod egress-deny policy blocked DNS despite this table's exception.
 See the [nftables chain documentation](https://wiki.nftables.org/wiki-nftables/index.php/Configuring_chains).
 
 INPUT defaults to drop. OUTPUT and FORWARD default to accept so this guest layer
@@ -60,10 +63,9 @@ NetworkPolicy must still limit which pods may use upstream DNS and node ports.
 
 Verified current assumptions: eth0 uses `192.168.5.15/24`; the DHCP server,
 gateway and DNS are `192.168.5.2`; Lima's Mac-initiated SSH arrives from that
-gateway. `cni0` and its pod range are future single-node Flannel assumptions,
-not an observed CNI. Interface-name matching allows syntax validation before
-that bridge exists. Do not broaden permissions if installed CNI behavior differs;
-review the observed path against the accepted plan first.
+gateway. K3s first start now confirms `cni0`, `flannel.1` and the single-node
+`10.42.0.0/24` pod route within the declared pod CIDR. Interface-name matching
+also permits static validation before the bridge exists.
 
 ## Persistence boundaries
 
@@ -78,11 +80,11 @@ remove Lima/K3s rules as well. The current stock unit is disabled/inactive.
 `ufw status` reports inactive; its enabled, active-exited systemd wrapper does
 not mean UFW filtering is enabled. Neither service was changed.
 
-`Before=k3s.service` establishes ordering, not a failure dependency. When K3s is
-later installed, its unit must require and start after this firewall service so
-a failed firewall start also prevents K3s startup. No K3s unit/drop-in is created
-in this step. The first activation was rolled back; the approved retry below
-left this unit active and enabled. Restart persistence remains untested.
+`Before=k3s.service` establishes ordering, not a failure dependency. The installed
+K3s drop-in now adds both `Requires` and `After` for this service; the merged unit
+was verified before first start. The first activation was rolled back; the approved retry below
+left this unit active and enabled. The later normal-restart check below verified
+automatic boot loading; the subsequent controlled-reload check also passed.
 
 ## Static validation performed
 
@@ -267,10 +269,202 @@ automatic expiry was not exercised. Final inspection confirmed:
   file. No VM restart, host DNS/trust change, stock firewall service change,
   GitHub write, commit or push occurred.
 
+## Normal restart persistence — 2026-10-22
+
+The maintainer authorized a normal restart and repeated node-level network
+checks. Used the existing pinned Lima **2.2.1** and unchanged source/installed
+firewall files. No firewall rule was reapplied, no unit was reloaded and no
+package or K3s component was installed.
+
+From the Mac:
+
+```sh
+task_lima_bin="$HOME/.local/opt/lima/2.2.1/bin/limactl"
+"$task_lima_bin" stop --tty=false finance-lab
+"$task_lima_bin" start --tty=false finance-lab
+```
+
+Both exited **0**. Between them, Lima reported Stopped and all seven reserved
+Mac TCP ports were closed and bindable. Start reached READY after an initial
+transient SSH readiness retry. The guest boot identifier changed, the root
+filesystem UUID remained the same and the instance YAML checksum was unchanged;
+private identifiers and raw logs remain outside Git.
+
+The new boot's journal and `systemctl show` timestamps place successful firewall
+completion at approximately **1.790 seconds**, before `network-pre.target`
+(**2.006 seconds**), networkd startup (**2.017 seconds**) and SSH startup
+(**5.630 seconds**). DHCP address acquisition was logged at **2.048 seconds**.
+The service was active (exited), enabled, Result=success and ExecMainStatus=0
+before the network tests. This establishes automatic boot persistence without
+a manual firewall application after restart.
+
+| Post-restart check | Observed result |
+| --- | --- |
+| Firewall/configuration integrity | Source/installed SHA-256 hashes and instance YAML unchanged; native `nft --check` and `systemd-analyze verify` exited 0 |
+| Rule ownership | Exactly `inet finance_lab` and Lima's `ip nat` table; stateless contents and rule ordering within each table match the pre-restart snapshot. Table listing order changed because the firewall now loads earlier; runtime handles/counters were excluded from this comparison |
+| VM state | Running, systemd running, zero failed units; 4 vCPUs, 8 GiB configured RAM and 60 GiB disk retained |
+| DHCP at boot | Journal records `192.168.5.15/24`, gateway/server `192.168.5.2`, acquired after the firewall loaded |
+| DHCP renewal | `sudo networkctl renew eth0` exited 0; a bounded packet capture observed a matching REQUEST/ACK. Address, router, server and DNS retained their expected values |
+| DNS | System resolution of app/api/auth returns `10.43.0.80`; direct UDP and TCP queries to `192.168.5.2:53` return the local application record and an external GitHub A record |
+| Outbound HTTPS | Certificate-validated requests to Ubuntu images, Ubuntu package metadata and GitHub return 200; GHCR `/v2/` returns the expected unauthenticated 401 |
+| Gateway isolation | Fresh TCP connections to gateway ports 60022, 16443, 8443, 18443, 13000, 19090 and 19443 time out; UDP 19877 is rejected with EPERM. The gateway OUTPUT drop counter increases by **22 packets** during these probes |
+| Denial evidence | The SSH listener plus six temporary TCP fixtures and one UDP fixture respond on Mac loopback before and after the gateway probes. No firewall exception was added to make a positive guest connection; live fixtures and correlated drop counters support the denial result |
+| Mac SSH access | Fresh non-multiplexed SSH succeeds before shutdown and after the completed network checks; all host-agent TCP listeners remain IPv4 loopback. TCP 60022 is bound only to `127.0.0.1`; host self-probes to three assigned non-loopback IPv4 addresses and IPv6 loopback fail |
+| Cleanup / boundaries | Temporary fixture process exits 0; all six TCP fixture ports and UDP 19877 are bindable again. VM stays Running; no K3s binary, K3s resolver file, host mounts or forwarded SSH agent appears |
+
+Read-only/check-only commands included:
+
+```sh
+systemctl show finance-lab-firewall.service
+journalctl -b -u finance-lab-firewall.service -u systemd-networkd.service --no-pager -o short-monotonic
+sudo nft --check --file /etc/finance-lab/firewall.nft
+sudo systemd-analyze verify /etc/systemd/system/finance-lab-firewall.service
+sudo nft --stateless --json list ruleset
+sudo nft --json list table inet finance_lab
+ip -j -4 address show
+ip -j -4 route show
+resolvectl dns
+getent ahostsv4 app.finance-lab.test
+```
+
+The same system-resolution check was run for api/auth and an external name.
+Bounded Python socket probes exercised direct UDP/TCP DNS, DHCP capture, Mac
+fixture banners and fresh gateway connections. HTTPS checks used `curl` with
+certificate validation, HTTPS-only URLs/redirects, a 10-second connection timeout
+and 30-second total timeout. Fresh SSH used Lima's generated config with
+`ControlMaster=no`, `ControlPath=none`, `BatchMode=yes` and `ConnectTimeout=5`.
+
+One harness assertion initially required the dedicated DHCP INPUT rule's counter
+to increase. That counter remained zero; replies can match the earlier
+established/related accept rule. The assertion was corrected to use actual DHCP
+boot acquisition, the matching renewal exchange and retained lease values.
+Previously captured gateway results/counters were revalidated without changing
+firewall rules or repeating the packet probes. A fresh SSH check then passed.
+The unchanged lease-file mtime is not treated as a failure.
+
+The existing cloud-init result remains **exit 2 / degraded done**, with
+`errors: []` and the same generated-configuration deprecations for
+`users.0.ssh-authorized-keys` and string-valued `users.0.uid`. No clean cloud-init
+exit or fix is claimed. Mac non-loopback evidence is from host self-probes, not
+an independent LAN machine. These results cover one graceful stop/start and
+the tested node paths; they do not establish crash recovery, every gateway port,
+future pod networking or whole-issue completion. No commit, push or GitHub edit
+was performed in this validation step.
+
+## Controlled reload and inbound denial — 2026-10-22
+
+Used the existing Lima **2.2.1**, unchanged firewall file/unit and guest tools.
+The VM remained Running with the same boot identity; no K3s installation,
+package installation, persistent forwarding change or firewall policy edit was
+performed.
+
+For reload, captured the active owned table and checked a restoration transaction
+that adds/flushes only `inet finance_lab`. Armed a root-owned guest-local
+three-minute systemd rollback timer to restore that snapshot. It never disables
+the firewall or flushes Lima's table. An independent, non-multiplexed SSH
+heartbeat was already running when these commands executed:
+
+```sh
+sudo nft --check --file /etc/finance-lab/firewall.nft
+sudo systemctl reload finance-lab-firewall.service
+```
+
+Both exited **0**. The existing SSH heartbeat continued, fresh SSH succeeded,
+local application DNS resolved and certificate-validated HTTPS to GitHub returned
+200. Stateless rule contents/order, source/installed hashes, instance YAML and
+boot identity were unchanged. Lima's NAT table was unchanged. The service stayed
+active/enabled. Acceptance cancelled the timer after these checks; rollback did
+not execute and timer expiry was not tested. The heartbeat exited cleanly.
+
+Inbound tests used temporary wildcard guest listeners and a bounded raw-packet
+capture on the **actual `eth0` interface**. Each listener responded on guest
+loopback before and after the remote probes. TCP probes used Lima's existing
+[bounded virtual-network connection endpoint](https://github.com/lima-vm/lima/blob/v2.2.1/pkg/networks/usernet/gvproxy.go#L232).
+UDP probes used two temporary Mac-loopback-only forwards through the
+[pinned forwarder API](https://github.com/containers/gvisor-tap-vsock/blob/v0.8.9/pkg/client/client.go),
+removed in the test driver's cleanup block. Automatic forwarding and the saved
+Lima configuration were not changed.
+
+| Inbound path | Observed result |
+| --- | --- |
+| TCP 22 positive control | Virtual-network connection succeeds (endpoint HTTP 200); fresh direct SSH also succeeds |
+| TCP 80, 443 | Ingress-port fixtures remain responsive locally; incoming gateway connections time out (endpoint HTTP 408) |
+| TCP 6443, 10250, 9100 | Management-port fixtures remain responsive locally; incoming gateway connections time out (endpoint HTTP 408) |
+| TCP 19876 | Arbitrary-port fixture remains responsive locally; incoming gateway connection times out |
+| UDP 8472 and 19876 | Synthetic datagrams arrive on eth0, but no reply reaches the Mac and neither datagram reaches the guest listener |
+| Packet/fixture evidence | Capture records all nine targeted protocol/port pairs, including SSH, across 15 incoming packets from `192.168.5.2` to `192.168.5.15`. Listener logs contain only the 16 expected loopback positive-control exchanges; no remote probe reaches a listener |
+
+The TCP endpoint timeout was set to two seconds. The UDP forwards temporarily
+mapped Mac `127.0.0.1:19878` to guest `192.168.5.15:8472` and Mac
+`127.0.0.1:19879` to guest `192.168.5.15:19876`, with two-second receive timeouts.
+The listener/capture process had a three-minute ceiling and was explicitly
+stopped after the probes. No temporary allow rule or diagnostic firewall table
+was added. These are node ingress checks against live synthetic listeners, not
+running Kubernetes components.
+
+Final verification confirmed the exact pre-test stateless rules, file hashes,
+instance configuration and boot identity, active/enabled firewall, and fresh SSH.
+All guest fixture ports were released. Both temporary UDP forwards and test
+processes were removed; the forwarder list returned to only
+`127.0.0.1:60022` -> `192.168.5.15:22`. Cancelled rollback and fixture files under
+`/run` were removed after their results were retained privately. No raw packet
+payload, host identity or secret was added to this repository.
+
+The host's first `py_compile` invocation was blocked by its cache-directory
+permissions; in-memory `compile(..., 'exec')` validation passed without changing
+host permissions. The runtime tests completed successfully. This step records
+local evidence only; no commit, push or GitHub edit was performed.
+
+## K3s first-start integration — 2026-10-22
+
+[Detailed evidence and commands](k3s/README.md#first-start-and-bounded-runtime-validation--2026-10-22)
+record the authorized first-start checks. The owned table is byte-identical
+ignoring counters; no firewall reload or VM restart occurred. Live K3s
+iptables-nft chains have priority 0 before the owned priority-10 hooks.
+
+Node and diagnostic-pod UDP/TCP DNS to `192.168.5.2` pass. Both can use cluster
+DNS, the private Traefik Service and outbound HTTPS. Node/API and Service/API
+paths validate the native CA and return 401 without credentials; pod-to-kubelet
+`/pods` returns 401, while pod-to-node SSH is denied. DHCP REQUEST/ACK and fresh
+Mac SSH still pass.
+
+Against live Mac-loopback controls, node and pod connections to all seven tested
+gateway TCP targets and UDP 19877 fail, with each relevant gateway-drop counter
+increasing by 22. A temporary policy selecting only the diagnostic pod blocks
+UDP/TCP gateway DNS despite the guest firewall exception, and removal restores
+DNS. Temporary resources/listeners were removed; no persistent application
+policy or operator tunnel was introduced.
+
+## K3s-enabled restart — 2026-10-22
+
+[Detailed evidence and commands](k3s/README.md#boot-enablement-and-normal-restart--2026-10-22)
+record boot enablement and a graceful Lima stop/start. The firewall became active
+at 1.792 seconds after boot, before K3s execution at 5.326 seconds. Both services
+are enabled and active; the owned stateless table and installed hashes are
+unchanged. K3s filter hooks remain at priority 0 before the owned priority 10.
+
+Repeated node/pod DNS, private Service/API routing, outbound HTTPS, gateway
+isolation and temporary NetworkPolicy precedence checks pass. Captured DHCP
+REQUEST/ACK retains the expected address/gateway/DNS, and fresh non-multiplexed
+Mac SSH succeeds. Temporary namespace, policy and echo fixtures were removed;
+all reserved Mac API/application/operator TCP ports remain closed. No firewall
+reload or persistent workload policy was applied during this stage.
+
+## Live Mac API tunnel — 2026-10-22
+
+The [Mac API-only access checks](MAC-ACCESS.md#validation--2026-10-22) verified the
+actual native-TLS listener on `127.0.0.1:16443`. Node and diagnostic-pod connections
+to `192.168.5.2:16443` time out while Mac controls succeed before/after; owned
+OUTPUT and FORWARD drop counters each increase by 3. Pod DNS still works. The
+owned table, VM boot and K3s state are unchanged. Temporary resources and the
+foreground tunnel were removed, and reserved Mac ports are closed again.
+
 ## Remaining gates
 
-Normal restart persistence, owned-table reload and broader inbound-denial
-coverage remain pending. No restart was performed in this step. After K3s and
-the permitted workload policies exist, verify pod gateway isolation, actual hook
-ordering, API/Service routing and allowed monitoring paths alongside denied
-application-to-node/operator/LAN flows. No whole-issue PASS is claimed.
+Application/operator tunnels, internal TLS and real credential/workload policies
+remain separate stages. The API-only tunnel is validated; the combined-tunnel
+maintenance transition is pending. Monitoring,
+application-to-node/operator/LAN restrictions and production isolation require
+the actual workloads and their policy rules. No spoofed-source, IPv6 or
+independent LAN-machine coverage, full storage/recovery acceptance or whole-issue
+PASS is claimed. Changes and evidence remain local; no GitHub status was updated.

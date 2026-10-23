@@ -1,0 +1,65 @@
+# Inventory only: not a Kubernetes manifest or an issuance script.
+# Each certificate entry requires its own private key, generated out of band.
+plan: https://github.com/finance-lab-project/platform/issues/1#issuecomment-6338942773
+issuer:
+  name: finance-lab-local-ca
+  tool: mkcert
+  version: 1.4.4
+  platform: darwin/arm64
+  url: https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-darwin-arm64
+  sha256: c8af0df44bce04359794dad8ea28d750437411d632748049d08644ffb66a60c6
+  # Computed from the official release asset; no publisher checksum was available.
+trust:
+  configMap: local-ca
+  key: ca.crt
+  namespaces: [finance-lab, argocd, monitoring]
+  mountPath: /etc/finance-lab/trust/ca.crt
+secretType: kubernetes.io/tls
+requiredSecretKeys: [tls.crt, tls.key]
+certificates:
+  - namespace: finance-lab
+    secret: edge-tls
+    dnsNames: [app.finance-lab.test, api.finance-lab.test, auth.finance-lab.test]
+    consumer: Traefik edge HTTPS 8443
+  - namespace: finance-lab
+    secret: spa-tls
+    dnsNames: [spa.finance-lab.svc.cluster.local]
+    consumer: SPA native HTTPS 8443
+  - namespace: finance-lab
+    secret: bff-tls
+    dnsNames: [bff.finance-lab.svc.cluster.local]
+    consumer: BFF native HTTPS 8443
+  - namespace: finance-lab
+    secret: budget-tls
+    dnsNames: [budget.finance-lab.svc.cluster.local]
+    consumer: Budget native HTTPS 8443
+  - namespace: finance-lab
+    secret: keycloak-tls
+    dnsNames: [keycloak.finance-lab.svc.cluster.local, keycloak-admin.finance-lab.test]
+    consumer: Keycloak HTTPS 8443 and private management HTTPS 9000
+  - namespace: finance-lab
+    secret: postgres-tls
+    dnsNames: [postgres.finance-lab.svc.cluster.local]
+    consumer: PostgreSQL TLS 5432
+  - namespace: argocd
+    secret: argocd-server-tls
+    dnsNames: [argocd.finance-lab.test]
+    consumer: Argo API/UI TLS service 443
+  - namespace: argocd
+    secret: argocd-repo-server-tls
+    dnsNames: [argocd-repo-server, argocd-repo-server.argocd.svc, argocd-repo-server.argocd.svc.cluster.local]
+    additionalSecretKeys: [ca.crt]
+    consumer: Argo repo-server TLS 8081
+  - namespace: argocd
+    secret: argocd-redis-tls
+    dnsNames: [argocd-redis, argocd-redis.argocd.svc, argocd-redis.argocd.svc.cluster.local]
+    consumer: Argo Redis TLS 6379
+  - namespace: monitoring
+    secret: grafana-tls
+    dnsNames: [grafana.finance-lab.test, grafana.monitoring.svc.cluster.local]
+    consumer: Grafana native HTTPS 3000
+  - namespace: monitoring
+    secret: prometheus-tls
+    dnsNames: [prometheus.finance-lab.test, prometheus-server.monitoring.svc.cluster.local, localhost]
+    ipAddresses: [127.0.0.1]
+    consumer: Prometheus native HTTPS 9090 including its local reload client

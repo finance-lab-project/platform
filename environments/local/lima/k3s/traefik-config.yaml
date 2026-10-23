@@ -1,0 +1,47 @@
+# Stage before first K3s start; keep the bundled HelmCharts owned by K3s.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    image:
+      registry: docker.io
+      repository: rancher/mirrored-library-traefik
+      tag: "3.7.13"
+      digest: sha256:444bb54c1f7ebe5fac94d1c40f02b48c08dc005a92fc65ca29c1c75991d16baa
+    hostNetwork: false
+    service:
+      spec:
+        type: ClusterIP
+        clusterIP: 10.43.0.80
+        ipFamilyPolicy: SingleStack
+        ipFamilies:
+          - IPv4
+    ports:
+      web:
+        expose:
+          default: false
+        forwardedHeaders:
+          insecure: false
+          trustedIPs: []
+        proxyProtocol:
+          insecure: false
+          trustedIPs: []
+      websecure:
+        port: 8443
+        exposedPort: 8443
+        expose:
+          default: true
+        http3:
+          enabled: false
+        forwardedHeaders:
+          insecure: false
+          trustedIPs: []
+        proxyProtocol:
+          insecure: false
+          trustedIPs: []
+    ingressRoute:
+      dashboard:
+        enabled: false

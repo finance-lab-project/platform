@@ -1,0 +1,17 @@
+# K3s imports *.server separately from its managed root server block.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  finance-lab.server: |
+    finance-lab.test:53 {
+        errors
+        cache 30
+        hosts /dev/null {
+            10.43.0.80 app.finance-lab.test api.finance-lab.test auth.finance-lab.test
+            ttl 60
+            no_reverse
+        }
+    }

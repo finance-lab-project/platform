@@ -1,0 +1,92 @@
+{
+  "source": "https://github.com/finance-lab-project/platform/issues/1",
+  "plan_revision": 8,
+  "k3s": {
+    "version": "v1.36.5+k3s1",
+    "platform": "linux/arm64",
+    "binary": {
+      "url": "https://github.com/k3s-io/k3s/releases/download/v1.36.5%2Bk3s1/k3s-arm64",
+      "sha256": "135e34cb9e8a1cfae3cb55577789e93501efe7edc080a8b2630458a85b07721e"
+    },
+    "checksum_manifest": "https://github.com/k3s-io/k3s/releases/download/v1.36.5%2Bk3s1/sha256sum-arm64.txt",
+    "installer_source": {
+      "url": "https://raw.githubusercontent.com/k3s-io/k3s/v1.36.5%2Bk3s1/install.sh",
+      "sha256": "46177d4c99440b4c0311b67233823a8e8a2fc09693f6c89af1a7161e152fbfad"
+    },
+    "optional_airgap": {
+      "url": "https://github.com/k3s-io/k3s/releases/download/v1.36.5%2Bk3s1/k3s-airgap-images-arm64.tar.zst",
+      "sha256": "aeb7b47b0f0cb1356a5f0bc1c11b7c499deceeeafcd411963064e02bfc77da84"
+    }
+  },
+  "charts": [
+    {
+      "name": "traefik",
+      "version": "40.1.5+up40.1.0",
+      "url": "https://k3s.io/k3s-charts/assets/traefik/traefik-40.1.5+up40.1.0.tgz",
+      "sha256": "d4d0e818284d310372d38adfce9a1cfb3179a69fc9f3ca8bfadb33581000b778"
+    },
+    {
+      "name": "traefik-crd",
+      "version": "40.1.5+up40.1.0",
+      "url": "https://k3s.io/k3s-charts/assets/traefik-crd/traefik-crd-40.1.5+up40.1.0.tgz",
+      "sha256": "749676684b53240c9024578b8e211053d4e6881c3d54dccb66d5308a01bcb489"
+    }
+  ],
+  "images": [
+    {
+      "tag": "docker.io/rancher/klipper-helm:v0.13.3-build20260727",
+      "index_digest": "sha256:5425a2b4613d2458dbdff99218e8d487ebb59c20e7a941f061c0777070f0aac1",
+      "arm64_manifest_digest": "sha256:c399ebe632420878b6b701a84e7481a26c3da2652594f9a86fef8b491f0c2dae"
+    },
+    {
+      "tag": "docker.io/rancher/klipper-lb:v0.4.17",
+      "index_digest": "sha256:910944bb0bd94f060a82a56ca1ea1c577d3e49b3473a093a47a985f32e92d94a",
+      "arm64_manifest_digest": "sha256:32905de585323a03fd44141626d021ac27d586dcd60899c7595b3986a858ba3e"
+    },
+    {
+      "tag": "docker.io/rancher/local-path-provisioner:v0.0.37",
+      "index_digest": "sha256:e757967a5ec338f6a9b371c5a9688bedaa8c3578ea3dd4db329ea0084be0a86f",
+      "arm64_manifest_digest": "sha256:6a6bade778f51df4e3f9710db6b62ff6eb366cac897e7eccc3528ebd6d22e86c"
+    },
+    {
+      "tag": "docker.io/rancher/mirrored-coredns-coredns:1.14.7",
+      "index_digest": "sha256:7efd3c635b03efd68c4e8398fc45f0d993d0e9ab016f72c1cefb0fd6d01aa286",
+      "arm64_manifest_digest": "sha256:9a631b1e34491f93a35334bc02d8ae190f16224be41689c7f42cc1711a95fe3a"
+    },
+    {
+      "tag": "docker.io/rancher/mirrored-library-busybox:1.37.0",
+      "index_digest": "sha256:101b4afd76732482eff9b95cae5f94bcf295e521fbec4e01b69c5421f3f3f3e5",
+      "arm64_manifest_digest": "sha256:fa8dc70514f29471fe118446e3f84040b19791531ec197836a4f43baf13d744b"
+    },
+    {
+      "tag": "docker.io/rancher/mirrored-library-traefik:3.7.13",
+      "index_digest": "sha256:f86a2cab1b5c649070c49f883c743dd32d8485a56e3368c5f93b9e91f1e91259",
+      "arm64_manifest_digest": "sha256:444bb54c1f7ebe5fac94d1c40f02b48c08dc005a92fc65ca29c1c75991d16baa"
+    },
+    {
+      "tag": "docker.io/rancher/mirrored-metrics-server:v0.9.0",
+      "index_digest": "sha256:d9862115e7c7881280d3d75ca26bda8ffc0fc213315979575bf23ce9826205c0",
+      "arm64_manifest_digest": "sha256:d0341e07a1cf2b751e684cba68e2a0c62d3c5d2d23501fd67dc384d517ec65de"
+    },
+    {
+      "tag": "docker.io/rancher/mirrored-pause:3.10.2",
+      "index_digest": "sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4",
+      "arm64_manifest_digest": "sha256:a433214620b407678934ebd69690a9ed6066247231eacfba181fab20dbc3dbf1"
+    }
+  ],
+  "static_renderer": {
+    "name": "helm",
+    "version": "4.3.1",
+    "platform": "darwin/arm64",
+    "url": "https://get.helm.sh/helm-v4.3.1-darwin-arm64.tar.gz",
+    "sha256": "6b4e61c8cd27d99e5a801e63ff25dd5c70b36875c2cd659d3e9ce6b76fc23198"
+  },
+  "operator_client": {
+    "name": "kubectl",
+    "version": "1.36.5",
+    "platform": "darwin/arm64",
+    "url": "https://dl.k8s.io/release/v1.36.5/bin/darwin/arm64/kubectl",
+    "sha256": "c5850a4a6b9469b26cce47c1ab456285f58e308283dcdf72b4ddda3db49b0ec0",
+    "checksum_url": "https://dl.k8s.io/release/v1.36.5/bin/darwin/arm64/kubectl.sha256"
+  }
+}

@@ -1,0 +1,111 @@
+# Prepared only. Apply after the prerequisites in README.md are satisfied.
+# No Namespace, Service, certificate, Secret or public CA payload is created here.
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: finance-lab-tls
+  namespace: finance-lab
+spec:
+  minVersion: VersionTLS12
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: spa-https
+  namespace: finance-lab
+spec:
+  serverName: spa.finance-lab.svc.cluster.local
+  rootCAs:
+    - configMap: local-ca
+  insecureSkipVerify: false
+  minVersion: VersionTLS12
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: bff-https
+  namespace: finance-lab
+spec:
+  serverName: bff.finance-lab.svc.cluster.local
+  rootCAs:
+    - configMap: local-ca
+  insecureSkipVerify: false
+  minVersion: VersionTLS12
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: keycloak-https
+  namespace: finance-lab
+spec:
+  serverName: keycloak.finance-lab.svc.cluster.local
+  rootCAs:
+    - configMap: local-ca
+  insecureSkipVerify: false
+  minVersion: VersionTLS12
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: app
+  namespace: finance-lab
+spec:
+  ingressClassName: traefik
+  entryPoints: [websecure]
+  routes:
+    - kind: Rule
+      match: Host(`app.finance-lab.test`)
+      services:
+        - name: spa
+          port: 8443
+          scheme: https
+          serversTransport: spa-https
+  tls:
+    secretName: edge-tls
+    options:
+      name: finance-lab-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api
+  namespace: finance-lab
+spec:
+  ingressClassName: traefik
+  entryPoints: [websecure]
+  routes:
+    - kind: Rule
+      match: Host(`api.finance-lab.test`)
+      services:
+        - name: bff
+          port: 8443
+          scheme: https
+          serversTransport: bff-https
+  tls:
+    secretName: edge-tls
+    options:
+      name: finance-lab-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: auth
+  namespace: finance-lab
+spec:
+  ingressClassName: traefik
+  entryPoints: [websecure]
+  routes:
+    - kind: Rule
+      match: >-
+        Host(`auth.finance-lab.test`) &&
+        (PathPrefix(`/realms/finance-lab/`) ||
+        PathPrefix(`/realms/master/`) || PathPrefix(`/resources/`))
+      services:
+        - name: keycloak
+          port: 8443
+          scheme: https
+          serversTransport: keycloak-https
+  tls:
+    secretName: edge-tls
+    options:
+      name: finance-lab-tls

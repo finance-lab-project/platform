@@ -1,0 +1,35 @@
+# Pinned K3s v1.36.5+k3s1, linux/arm64.
+# Guest destination: /etc/rancher/k3s/config.yaml (root:root, 0600).
+# Version/checksum selection belongs to the installer, not this YAML.
+node-name: finance-lab
+node-ip: 192.168.5.15
+advertise-address: 192.168.5.15
+# Keep both guest loopback and in-cluster API access. The guest firewall and
+# disabled Lima forwarding enforce Mac-only operator transport.
+bind-address: 0.0.0.0
+https-listen-port: 6443
+tls-san:
+  - 127.0.0.1
+tls-san-security: true
+write-kubeconfig-mode: "0600"
+secrets-encryption: true
+
+# Single server with K3s's default SQLite and bundled containerd.
+# No cluster-init, external datastore, Docker or external runtime endpoint.
+data-dir: /var/lib/rancher/k3s
+default-local-storage-path: /var/lib/rancher/k3s/storage
+cluster-cidr: 10.42.0.0/16
+service-cidr: 10.43.0.0/16
+cluster-dns: 10.43.0.10
+cluster-domain: cluster.local
+flannel-backend: vxlan
+flannel-iface: eth0
+resolv-conf: /etc/rancher/k3s/resolv.conf
+disable-network-policy: false
+disable:
+  - servicelb
+
+# Supported image overrides in the exact pinned release.
+pause-image: docker.io/rancher/mirrored-pause:3.10.2@sha256:a433214620b407678934ebd69690a9ed6066247231eacfba181fab20dbc3dbf1
+helm-controller-arg:
+  - default-job-image=docker.io/rancher/klipper-helm:v0.13.3-build20260727@sha256:c399ebe632420878b6b701a84e7481a26c3da2652594f9a86fef8b491f0c2dae

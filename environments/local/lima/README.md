@@ -5,16 +5,16 @@ This directory contains the standalone VM configuration for
 using [platform #1 revision 8](https://github.com/finance-lab-project/platform/issues/1).
 The instance name is `finance-lab`, matching the YAML filename.
 
-Completed scope: configuration preparation, pinned host-tool installation,
-image checksum verification, static Mac preflight, VM creation, first-boot
-validation and a graceful stop/start with resource, DNS, network and Mac access
-checks. Lima completed its normal guest bootstrap. The prepared guest firewall
-is now active/enabled after an approved retry with temporary connection tracking
-and timed rollback. Existing/fresh SSH, DHCP, DNS, outbound HTTPS and guest gateway
-isolation passed runtime checks; temporary rules/listeners were removed and
-rollback was cancelled. See [FIREWALL.md](FIREWALL.md) for the evidence and initial
-failed attempt. Restart persistence, K3s installation, Kubernetes resources,
-application credentials, certificates and deployment remain pending.
+**Start with [HANDOFF.md](HANDOFF.md)** for the current checkpoint, remaining
+issues and a minimal reading path for a fresh chat.
+
+The VM, persistent guest firewall, pinned K3s foundation, Mac API-only access,
+namespace isolation and initial CA/TLS Secret delivery have passed their staged
+checks. Temporary pods also passed read-only mounts and internal TLS validation;
+all diagnostic fixtures were removed. Real consumer wiring, protected CA
+recovery and private application ingress remain open in issues #8–#10.
+The detailed sections below and linked evidence documents describe the state
+observed at each stage; this publication step makes no runtime changes.
 
 ## Connect from the Mac
 
@@ -36,7 +36,8 @@ ssh -F "$HOME/.lima/finance-lab/ssh.config" lima-finance-lab
 
 These commands connect to an already running instance; they do not start it,
 restart it or create application/API tunnels. Keep the generated SSH files and
-private keys outside Git.
+private keys outside Git. For the separate foreground Kubernetes API tunnel and
+pinned Mac client commands, see [Mac API access](MAC-ACCESS.md).
 
 ## Pinned inputs
 
@@ -51,7 +52,7 @@ private keys outside Git.
 | SSH control | Mac loopback port 60022; no agent forwarding or extra host SSH keys |
 | Application DNS | The three `app/api/auth.finance-lab.test` names resolve to planned ingress `10.43.0.80` inside the guest |
 | Guest DNS upstream | DHCP-supplied `192.168.5.2`; also the Lima host gateway, so the active guest firewall includes a narrow TCP/UDP 53 exception |
-| Forwarding | Ignore automatic forwarding for all guest ports/protocols; explicit application/API tunnels are a later step |
+| Forwarding | Ignore automatic forwarding for all guest ports/protocols; API-only foreground tunnel validated and closed after use; application tunnel pending |
 
 The pinned Lima archive is
 [lima-2.2.1-Darwin-arm64.tar.gz](https://github.com/lima-vm/lima/releases/download/v2.2.1/lima-2.2.1-Darwin-arm64.tar.gz),
@@ -497,3 +498,42 @@ its planned resolver file remained absent. The VM stayed Running with unchanged
 boot identity. No firewall reload, VM restart or K3s installation was performed.
 Earlier DHCP, DNS, HTTPS and gateway-isolation evidence was not rerun in this
 publication step. No GitHub Actions or independent review result is claimed.
+
+
+### Firewall restart persistence — 2026-10-22
+
+Completed one approved graceful stop/start using pinned Lima 2.2.1. The VM
+reached READY; its boot identity changed while root filesystem, instance YAML
+and installed firewall/unit hashes were retained. The firewall loaded
+automatically before network setup and stayed active/enabled. Native checks and
+per-table stateless comparisons passed; no rule or service configuration changed.
+
+Post-restart checks passed for DHCP boot acquisition and actual renewal
+REQUEST/ACK, system and direct UDP/TCP DNS, fresh SSH, outbound HTTPS and tested
+node-to-gateway denial. Live Mac fixtures remained reachable locally while the
+firewall drop counter increased by 22 packets. Fixtures were removed; SSH remains
+Mac-loopback-only and the VM is left Running. K3s is still absent.
+
+See [restart evidence and limits](FIREWALL.md#normal-restart-persistence--2026-10-22)
+for commands, results and the corrected DHCP-counter assertion. The existing
+cloud-init deprecation warning remains; owned-table reload, broader inbound
+coverage and K3s/pod integration are pending. This step records local evidence
+only, with no commit, push or GitHub edit.
+
+
+### Controlled firewall reload and inbound checks — 2026-10-22
+
+Completed the unchanged owned-table reload with a guest-local timed rollback.
+Existing/fresh SSH, local DNS and HTTPS remained available; the exact owned and
+Lima NAT rules were retained. Rollback was cancelled after validation and did
+not execute. No VM restart occurred.
+
+Actual eth0 probes were denied for six TCP fixture ports and two UDP ports,
+including management, ingress and VXLAN. Packet arrival and live loopback
+controls were verified; SSH remained reachable. Temporary listeners, packet
+capture, two loopback-only UDP forwards and guest test files were removed.
+The VM remains Running with the firewall active/enabled and K3s absent.
+
+[Detailed evidence and limits](FIREWALL.md#controlled-reload-and-inbound-denial--2026-10-22)
+records the exact tested paths. Future K3s/pod/TLS/credential acceptance remains
+pending. Documentation changes remain local and uncommitted.

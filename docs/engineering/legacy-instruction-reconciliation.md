@@ -1,5 +1,7 @@
 # Legacy instruction reconciliation
 
+> **Historical reconciliation.** Product priorities and Release 1 sequencing are now governed by [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md). Retain the safeguards below; old Go/platform pilot priorities do not authorize current work.
+
 The older agent rules were inspected in:
 - [anton415/finance-lab AGENTS.md](https://github.com/anton415/finance-lab/blob/main/AGENTS.md) — current frontend source, original core policy.
 - [anton415/finance-lab-archive AGENTS.md](https://github.com/anton415/finance-lab-archive/blob/main/AGENTS.md) — older Russian instruction set.

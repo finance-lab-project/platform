@@ -1,5 +1,7 @@
 # Proposed root AGENTS.md for web-bff
 
+> **Historical plan — superseded for Release 1 on 2026-10-24.** Follow [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md) and the [current roadmap](current-roadmap.md). The original text below is retained for traceability; it does not authorize Go/BFF/platform execution or define the current release dependency order.
+
 > This is a **template**, not live repo instructions. The BFF Git repository is currently empty and must be initialized under a separately approved bootstrap before this can be committed via PR.
 
 # Instructions for AI agents

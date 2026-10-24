@@ -1,10 +1,10 @@
 # Finance Lab execution modes — all service repositories (v1)
 
-**Status:** Policy proposal for review. On merge it governs `platform`; each other repository must adopt its own root `AGENTS.md`. Mode labels alone are classification, not a permission to run agents. **Release 1 target:** 2026-12-31. This policy does not authorize model dispatch, commits, infrastructure mutations, spending or merge.
+**Status:** Policy proposal for review. On merge it governs `platform`; each other repository must adopt its own root `AGENTS.md`. Mode labels alone are classification, not a permission to run agents. **Current delivery direction:** [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md); a tiny frontend release targets October 24–25, 2026. December 31 is a progress review checkpoint. This policy does not authorize model dispatch, commits, infrastructure mutations, spending or merge.
 
 ## Why this exists
 
-Finance Lab has two separate outcomes: ship a reliable first authenticated monthly Budget journey, and develop the maintainer's independent engineering competence. Delegating every task may ship features without establishing that competence; implementing all boilerplate manually would jeopardize the release. Execution mode selects **who should do the thinking and implementation**, not feature priority or lifecycle stage.
+Finance Lab has two separate outcomes: ship a tiny working frontend first, then incrementally add Java/Spring Budget capabilities, and develop the maintainer's independent engineering competence. Delegating every task may ship features without establishing that competence; implementing all boilerplate manually would jeopardize the release. Execution mode selects **who should do the thinking and implementation**, not feature priority or lifecycle stage.
 
 ### Two exclusive labels for executable issues
 
@@ -76,11 +76,11 @@ A new commit, changed source contract, review supersession, changed scope, or co
 
 ## Pilot and measurement
 
-Start with **one protected Go Budget learning task** (new Go service [#12](https://github.com/finance-lab-project/budget-service/issues/12), subject to human approval of its design checkpoint) and **one platform delivery task** ([#2](https://github.com/finance-lab-project/platform/issues/2), continuing existing partial implementation only within accepted gates). Do **not** relabel or relaunch them solely because this document was published. Record one bounded Mac mini incident/diagnosis exercise separately, not a reason to rebuild the working stand.
+**Historical pilot proposal, deferred under ADR-031:** the prior plan started with **one protected Go Budget learning task** (new Go service [#12](https://github.com/finance-lab-project/budget-service/issues/12), subject to human approval of its design checkpoint) and **one platform delivery task** ([#2](https://github.com/finance-lab-project/platform/issues/2), continuing existing partial implementation only within accepted gates). Do **not** relabel or relaunch them solely because this document was published. Record one bounded Mac mini incident/diagnosis exercise separately, not a reason to rebuild the working stand.
 
-Evaluate: (1) human can explain and independently demonstrate selected skill, (2) agents stayed within permissions, (3) measured validation/rework evidence, (4) impact on Release 1's critical path. Do not infer competence or agent authorship from GitHub account names, PR completion, or raw metrics. Record unavailable values as `unknown`, not zero.
+Evaluate: (1) human can explain and independently demonstrate selected skill, (2) agents stayed within permissions, (3) measured validation/rework evidence, (4) impact on the currently selected small release. Do not infer competence or agent authorship from GitHub account names, PR completion, or raw metrics. Record unavailable values as `unknown`, not zero.
 
-The current issue mapping and cross-repository dependencies are documented in [Release 1 execution map](release1-execution-map.md).
+The current sequence is in the [product roadmap](current-roadmap.md). The [old Release 1 execution map](release1-execution-map.md) is retained as history; its Go/BFF/platform dependency order is superseded.
 
 ## Existing delegated work and non-repository approvals
 

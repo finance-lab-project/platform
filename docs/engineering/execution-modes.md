@@ -1,6 +1,8 @@
 # Finance Lab execution modes — all service repositories (v1)
 
-**Status:** Policy proposal for review. On merge it governs `platform`; each other repository must adopt its own root `AGENTS.md`. Mode labels alone are classification, not a permission to run agents. **Current delivery direction:** [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md); a tiny frontend release targets October 24–25, 2026. December 31 is a progress review checkpoint. This policy does not authorize model dispatch, commits, infrastructure mutations, spending or merge.
+**Status:** Policy proposal for review. On merge it governs `platform`; each other repository must adopt its own root `AGENTS.md`. Mode labels alone are classification, not a permission to run agents. **Current delivery direction:** [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md); a tiny frontend release targets October 24–25, 2026. The [architecture-first workflow](architecture-first-workflow.md) supplies the current Q4 ownership, review, board and December 31 MVP target. This policy does not authorize model dispatch, commits, infrastructure mutations, spending or merge.
+
+The workflow's dated Q4 section takes precedence over historical pilot/role suggestions below. Human-owned HLD/LLD/ADRs and acceptance criteria remain separate from AI-owned code execution. Ordinary in-scope fix commits require fresh head-bound review and merge consent; they do not reopen an unchanged implementation brief. This proposal creates no autonomous dispatch controller.
 
 ## Why this exists
 

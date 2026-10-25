@@ -1,5 +1,7 @@
 # Release 1 — organization execution-mode roadmap
 
+> **Historical plan — superseded for Release 1 on 2026-10-24.** Follow [ADR-031](../architecture/decisions/0031-java-spring-budget-incremental-releases.md) and the [current roadmap](current-roadmap.md). The original text below is retained for traceability; it does not authorize Go/BFF/platform execution or define the current release dependency order.
+
 **Snapshot:** 2026-10-23. **Product priority:** the first authenticated monthly Budget journey by **2026-12-31**. This map proposes ownership; it does not change release contracts, dependency order, GitHub Project status, `needs:*` labels, service architecture or actual implementation authorization.
 
 See [execution-modes.md](execution-modes.md) and [A1 historical planning index](https://github.com/anton415/finance-lab/issues/146).

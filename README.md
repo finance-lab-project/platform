@@ -1,7 +1,13 @@
-# Finance Lab platform and project direction
+# Finance Lab legacy platform
 
-[Architecture-first AI workflow](docs/engineering/architecture-first-workflow.md) · [Current product roadmap](docs/engineering/current-roadmap.md) · [ADR-031](docs/architecture/decisions/0031-java-spring-budget-incremental-releases.md) · [2026-10-24 audit](docs/engineering/architecture-reset-audit-2026-10-24.md)
+The current project home is [finance-lab-project/app](https://github.com/finance-lab-project/app).
 
-Finance Lab prioritizes a tiny React/TypeScript release on October 24–25, 2026, followed by incremental Java/Spring Boot Budget work with PostgreSQL when needed. Go remains an optional later standalone learning service/CLI, outside Release 1.
+- [Architecture and decisions](https://github.com/finance-lab-project/app/blob/main/docs/architecture.md)
+- [Release roadmap](https://github.com/finance-lab-project/app/blob/main/docs/roadmap.md)
+- [Release 1 delivery issue](https://github.com/finance-lab-project/app/issues/1)
 
-This repository preserves platform experiments and organization governance. Existing Lima/K3s, identity and GitOps work is deferred and is not required for the first frontend release. Follow [AGENTS.md](AGENTS.md) and separately approved issue scopes; no deployment or infrastructure change is authorized by the roadmap.
+Finance Lab is being redesigned as a Java/Vaadin modular monolith without Spring, with PostgreSQL Anchor Modeling and a custom ORM. Budget is implemented first; Portfolio and FIRE remain planned modules. The first release is a private Russian-language, RUB-only application on one Yandex Cloud VM.
+
+This repository preserves platform experiments and governance. Earlier React/Spring, Go/BFF, Lima/K3s and GitOps roadmaps are historical and are not prerequisites for this release. The separate learning issue track is retired.
+
+Follow [AGENTS.md](AGENTS.md) and individually approved issue scopes. These documents do not authorize infrastructure changes or deployment.
